@@ -15,6 +15,20 @@ services:
     volumes:
     - ./:/opt/
 
+  # data api
+  s3_data:
+    image: s3_data:1.0.0
+    build:
+      context: ./dockerfiles/s3_data
+      dockerfile: Dockerfile
+    tty: true
+    command: flask run --host=0.0.0.0 --port=4005
+    environment:
+      - FLASK_APP=s3_data
+      - FLASK_ENV=development
+    volumes:
+    - ./:/opt/
+
   # aws
   aws_cli:
     image: my_aws_cli:1.0.0
@@ -58,3 +72,63 @@ services:
     volumes:
       - "./dockerfiles/scylla_db/scylla.yaml:/etc/scylla/scylla.yaml"
       - "./dockerfiles/scylla_db/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
+
+  # hadoop
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - 9870:9870
+      - 9000:9000
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./dockerfiles/hadoop/hadoop.env
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    restart: always
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./dockerfiles/hadoop/hadoop.env
+
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864"
+    env_file:
+      - ./dockerfiles/hadoop/hadoop.env
+
+  nodemanager1:
+    image: bde2020/hadoop-nodemanager:2.0.0-hadoop3.2.1-java8
+    container_name: nodemanager
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    env_file:
+      - ./dockerfiles/hadoop/hadoop.env
+
+  historyserver:
+    image: bde2020/hadoop-historyserver:2.0.0-hadoop3.2.1-java8
+    container_name: historyserver
+    restart: always
+    environment:
+      SERVICE_PRECONDITION: "namenode:9000 namenode:9870 datanode:9864 resourcemanager:8088"
+    volumes:
+      - hadoop_historyserver:/hadoop/yarn/timeline
+    env_file:
+      - ./dockerfiles/hadoop/hadoop.env
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+  hadoop_historyserver:
