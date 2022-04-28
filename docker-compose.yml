@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  # metadata api
+  s3_metadata:
+    image: s3_metadata:1.0.0
+    build:
+      context: ./dockerfiles/s3_metadata
+      dockerfile: Dockerfile
+    tty: true
+    environment:
+      - FLASK_APP=s3_metadata
+      - FLASK_ENV=development
+    command: flask run --host=0.0.0.0 --port=4000
+    volumes:
+    - ./:/opt/
+
+  # aws
+  aws_cli:
+    image: my_aws_cli:1.0.0
+    build:
+      context: ./dockerfiles/aws
+      dockerfile: Dockerfile
+    tty: true
+    entrypoint: /bin/sh
+    volumes:
+    - ./scripts:/aws/scripts:ro
+
+  # scylla
+  # seeds: discover ring topology and gossip (metadata exchange) convergence
+  # smp: logical cores
+  # memory: ram limit
+  # overprovisioned: scylla is not alone
+  # api-address:
+  scylla_db_1:
+    container_name: scylla_db_1
+    image: scylladb/scylla:4.5.0
+    restart: always
+    command: --seeds=scylla_db_1,scylla_db_2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./dockerfiles/scylla_db/scylla.yaml:/etc/scylla/scylla.yaml"
+      - "./dockerfiles/scylla_db/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
+
+  scylla_db_2:
+    container_name: scylla_db_2
+    image: scylladb/scylla:4.5.0
+    restart: always
+    command: --seeds=scylla_db_1,scylla_db_2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./dockerfiles/scylla_db/scylla.yaml:/etc/scylla/scylla.yaml"
+      - "./dockerfiles/scylla_db/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"
+
+  scylla_db_3:
+    container_name: scylla_db_3
+    image: scylladb/scylla:4.5.0
+    restart: always
+    command: --seeds=scylla_db_1,scylla_db_2 --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - "./dockerfiles/scylla_db/scylla.yaml:/etc/scylla/scylla.yaml"
+      - "./dockerfiles/scylla_db/cassandra-rackdc.properties.dc1:/etc/scylla/cassandra-rackdc.properties"

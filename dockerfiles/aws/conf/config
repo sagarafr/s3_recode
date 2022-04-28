@@ -1,0 +1,6 @@
+[plugins]
+endpoint = awscli_plugin_endpoint
+
+[default]
+region = local
+output = json

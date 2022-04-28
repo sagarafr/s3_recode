@@ -1,0 +1,15 @@
+certifi==2021.10.8
+charset-normalizer==2.0.12
+click==8.1.2
+dict2xml==1.7.1
+Flask==2.1.1
+geomet==0.2.1.post1
+idna==3.3
+itsdangerous==2.1.2
+Jinja2==3.1.1
+MarkupSafe==2.1.1
+requests==2.27.1
+scylla-driver==3.25.4
+six==1.16.0
+urllib3==1.26.9
+Werkzeug==2.1.1
