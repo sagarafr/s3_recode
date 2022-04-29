@@ -29,3 +29,13 @@ def bucket_already_exists(bucket_name: str):
     return generate_error("BucketAlreadyExists", "The requested bucket name is not available. The bucket namespace is "
                                                  "shared by all users of the system. Specify a different name and try again.",
                           f"{bucket_name}", "4442587FB7D0A2F9", HTTPStatus.CONFLICT)
+
+
+def no_such_bucket(bucket_name: str):
+    return generate_error("NoSuchBucket", "The specified bucket does not exist.", f"{bucket_name}", "4442587FB7D0A2F9",
+                          HTTPStatus.NOT_FOUND)
+
+
+def no_such_key(bucket_name: str, key: str):
+    return generate_error("NoSuchKey", "The specified key does not exist.", f"{bucket_name}/{key}", "4442587FB7D0A2F9",
+                          HTTPStatus.NOT_FOUND)

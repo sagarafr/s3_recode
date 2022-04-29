@@ -10,6 +10,7 @@ from s3_metadata.utils.db import list_bucket as db_list_bucket
 from s3_metadata.utils.utils import have_a_correct_name, get_access_key_id
 from .all_buckets import Buckets, Bucket
 from .error import bucket_already_exists, invalid_bucket_name
+from s3_metadata.objects.hadoop import create_directories
 
 BP_BUCKET = blueprints.Blueprint('bucket', __name__)
 
@@ -41,6 +42,7 @@ def create_bucket(bucket: str):
 
     access_key_id = get_access_key_id(request.headers)
     db_create_bucket(bucket, access_key_id)
+    create_directories(bucket)
     response = make_response()
     response.headers["Location"] = bucket
 

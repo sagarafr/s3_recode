@@ -16,18 +16,18 @@ services:
     - ./:/opt/
 
   # data api
-  s3_data:
-    image: s3_data:1.0.0
-    build:
-      context: ./dockerfiles/s3_data
-      dockerfile: Dockerfile
-    tty: true
-    command: flask run --host=0.0.0.0 --port=4005
-    environment:
-      - FLASK_APP=s3_data
-      - FLASK_ENV=development
-    volumes:
-    - ./:/opt/
+#  s3_data:
+#    image: s3_data:1.0.0
+#    build:
+#      context: ./dockerfiles/s3_data
+#      dockerfile: Dockerfile
+#    tty: true
+#    command: flask run --host=0.0.0.0 --port=4005
+#    environment:
+#      - FLASK_APP=s3_data
+#      - FLASK_ENV=development
+#    volumes:
+#    - ./:/opt/
 
   # aws
   aws_cli:

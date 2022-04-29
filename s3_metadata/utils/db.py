@@ -50,6 +50,17 @@ def init_tables():
         );
         """
     )
+    session.execute(
+        """
+        CREATE TABLE IF NOT EXISTS object (
+            bucket_name text,
+            object_name text,
+            hdfs_path text,
+            last_modified timestamp,
+            PRIMARY KEY (bucket_name, object_name)
+        );
+        """
+    )
 
 
 def init_db():
@@ -95,3 +106,32 @@ def is_bucket_already_exist(bucket_name: str):
     if not rows:
         return False
     return True
+
+
+def create_object(bucket_name: str, object_name: str, hdfs_path: str):
+    session = get_s3_metadata_session()
+    now = datetime.now(timezone.utc).isoformat('T', 'seconds')
+
+    session.execute(
+        f"""
+        INSERT INTO object (bucket_name, object_name, hdfs_path, last_modified) VALUES ('{bucket_name}', '{object_name}', '{hdfs_path}', '{now}');
+        """
+    )
+
+
+def list_object(bucket_name: str):
+    session = get_s3_metadata_session()
+    return session.execute(
+        f"""
+        SELECT object_name, last_modified FROM object WHERE bucket_name='{bucket_name}';
+        """
+    )
+
+
+def select_object(bucket_name: str, object_name: str):
+    session = get_s3_metadata_session()
+    return session.execute(
+        f"""
+        SELECT hdfs_path FROM object WHERE bucket_name='{bucket_name}' AND object_name='{object_name}';
+        """
+    )
