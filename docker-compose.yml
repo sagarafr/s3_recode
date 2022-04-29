@@ -14,6 +14,25 @@ services:
     command: flask run --host=0.0.0.0 --port=4000
     volumes:
     - ./:/opt/
+    labels:
+      - traefik.http.routers.s3_metadata.rule=Host(`s3.localhost`)
+      - traefik.http.services.s3_metadata-service.loadbalancer.server.port=4000
+
+  # reverse proxy
+  reverse_proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.6
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+
 
   # data api
 #  s3_data:
